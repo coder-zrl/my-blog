@@ -94,17 +94,16 @@ public class AttachController extends BaseController {
             response.setHeader("Content-Type","text/html");
 
             for (MultipartFile file :files) {
-
                 String fileName = TaleUtils.getFileKey(file.getOriginalFilename().replaceFirst("/", ""));
-
+                fileName = fileName.substring(1);
                 QiNiuCloudService.upload(file, fileName);
                 AttAchDomain attAchDomain = new AttAchDomain();
                 HttpSession session = request.getSession();
                 UserDomain sessionUser = (UserDomain) session.getAttribute(WebConst.LOGIN_SESSION_KEY);
                 attAchDomain.setAuthorId(sessionUser.getUid());
                 attAchDomain.setFtype(TaleUtils.isImage(file.getInputStream()) ? Types.IMAGE.getType() : Types.FILE.getType());
-                attAchDomain.setFname(fileName);
-                attAchDomain.setFkey(QiNiuCloudService.QINIU_UPLOAD_SITE + fileName);
+                attAchDomain.setFname("/"+fileName);
+                attAchDomain.setFkey(QiNiuCloudService.QINIU_UPLOAD_SITE + "/" + fileName);
                 attAchService.addAttAch(attAchDomain);
             }
             return APIResponse.success();

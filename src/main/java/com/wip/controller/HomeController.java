@@ -33,7 +33,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.net.URLEncoder;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Api("博客前台页面")
 @Controller
@@ -77,7 +79,24 @@ public class HomeController extends BaseController {
             int limit
     ) {
         PageInfo<ContentDomain> articles = contentService.getArticlesByCond(new ContentCond(), page, limit);
-        request.setAttribute("articles", articles);
+        Map<String, List<ContentDomain>> map = articles.getList().stream().collect(Collectors.groupingBy(item -> {
+            Integer created = item.getCreated();
+            String year = new SimpleDateFormat("YYYY").format(new Date(Long.valueOf(created) * 1000));
+            return year;
+        }));
+        Map<String, List<ContentDomain>> treeMap = new TreeMap<>(
+                new Comparator<String>() {
+                    @Override
+                    public int compare(String obj1, String obj2) {
+                        // 降序排序
+                        return Integer.valueOf(obj2)-Integer.valueOf(obj1);
+                    }
+                });
+        map.forEach((k,v)->{
+            treeMap.put(k,v);
+        });
+        request.setAttribute("map", treeMap);
+        //request.setAttribute("articles",articles);
         return "blog/archives";
     }
 
@@ -258,9 +277,7 @@ public class HomeController extends BaseController {
             }
             // 设置对每个文章1分钟可以评论一次
             cache.hset(Types.COMMENTS_FREQUENCY.getType(),val,1,60);
-
             return APIResponse.success();
-
         } catch (Exception e) {
             throw BusinessException.withErrorCode(ErrorConstant.Comment.ADD_NEW_COMMENT_FAIL);
         }

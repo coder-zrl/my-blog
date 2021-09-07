@@ -29,8 +29,8 @@ public enum Types {
      * 附件存在的URL，默认为网站地址，如集成第三方则为第三方CND域名
      */
     // ATTACH_URL("attach_url");
-    ATTACH_URL("http://pb84kab39.bkt.clouddn.com/");
-
+    //ATTACH_URL("http://pb84kab39.bkt.clouddn.com/");
+    ATTACH_URL("http://");
     private String type;
 
     public java.lang.String getType() {
